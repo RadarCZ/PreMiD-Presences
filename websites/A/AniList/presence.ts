@@ -10,27 +10,30 @@ async function getStrings() {
 	});
 }
 
+const enum Assets {
+	Logo = "https://cdn.rcd.gg/PreMiD/websites/A/AniList/assets/logo.png",
+}
+
 let strings: Awaited<ReturnType<typeof getStrings>>;
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-			largeImageKey: "anilist_lg",
+			largeImageKey: Assets.Logo,
 			startTimestamp,
 		},
 		pathnameArray = document.location.pathname.split("/"),
 		page = pathnameArray[1],
-		showCover = await presence.getSetting<boolean>("cover");
+		[showCover, showButton] = await Promise.all([
+			presence.getSetting<boolean>("cover"),
+			presence.getSetting<boolean>("buttons"),
+		]);
 	strings = await getStrings();
 
 	switch (page) {
-		case "":
-			presenceData.details = strings.browsing;
-			presenceData.state = "Home";
-			break;
 		case "user": {
 			if (showCover) {
 				presenceData.largeImageKey = document
-					.querySelector(".avatar")
+					.querySelectorAll(".avatar")[1]
 					.getAttribute("src");
 				presenceData.smallImageKey = "anilist_lg";
 			}
@@ -67,7 +70,7 @@ presence.on("UpdateData", async () => {
 		}
 		case "search":
 			presenceData.details = "Searching";
-			presenceData.smallImageKey = "search";
+			presenceData.smallImageKey = Assets.Search;
 			presenceData.smallImageText = "Searching";
 			break;
 		case "anime":
@@ -110,7 +113,7 @@ presence.on("UpdateData", async () => {
 				presenceData.state = `'${document
 					.querySelector("h1.title")
 					.textContent.trim()}'`;
-				presenceData.smallImageKey = "reading";
+				presenceData.smallImageKey = Assets.Reading;
 				presenceData.smallImageText = strings.reading;
 			} else presenceData.details = "Browsing the forum";
 			break;
@@ -130,7 +133,7 @@ presence.on("UpdateData", async () => {
 				.querySelector("a.author")
 				.textContent.trim()
 				.replace("a review ", "")}`;
-			presenceData.smallImageKey = "reading";
+			presenceData.smallImageKey = Assets.Reading;
 			presenceData.smallImageText = strings.reading;
 			break;
 		case "recommendations":
@@ -145,7 +148,13 @@ presence.on("UpdateData", async () => {
 		case "settings":
 			presenceData.details = "Changing settings";
 			break;
+		default:
+			presenceData.details = strings.browsing;
+			presenceData.state = "Home";
+			break;
 	}
+
+	if (!showButton) delete presenceData.buttons;
 
 	presence.setActivity(presenceData, true);
 });

@@ -27,9 +27,11 @@ presence.on("UpdateData", async () => {
 			presence.getSetting<boolean>("privacy"),
 		]),
 		{ mediaSession } = navigator,
-		watchID = document
-			.querySelector<HTMLAnchorElement>("a.ytp-title-link.yt-uix-sessionlink")
-			.href.match(/v=([^&#]{5,})/)?.[1],
+		watchID =
+			href.match(/v=([^&#]{5,})/)?.[1] ??
+			document
+				.querySelector<HTMLAnchorElement>("a.ytp-title-link.yt-uix-sessionlink")
+				?.href.match(/v=([^&#]{5,})/)?.[1],
 		repeatMode = document
 			.querySelector('ytmusic-player-bar[slot="player-bar"]')
 			.getAttribute("repeat-Mode_"),
@@ -58,9 +60,11 @@ presence.on("UpdateData", async () => {
 
 	if (["playing", "paused"].includes(mediaSession.playbackState)) {
 		if (privacyMode) {
+			presenceData.type = ActivityType.Listening;
 			return presence.setActivity({
 				...(mediaSession.playbackState === "playing" && {
-					largeImageKey: "ytm_lg",
+					largeImageKey:
+						"https://cdn.rcd.gg/PreMiD/websites/Y/YouTube%20Music/assets/logo.png",
 					details: "Listening to music",
 				}),
 			});
@@ -141,8 +145,10 @@ presence.on("UpdateData", async () => {
 		};
 	} else if (showBrowsing) {
 		if (privacyMode) {
+			presenceData.type = ActivityType.Listening;
 			return presence.setActivity({
-				largeImageKey: "ytm_lg",
+				largeImageKey:
+					"https://cdn.rcd.gg/PreMiD/websites/Y/YouTube%20Music/assets/logo.png",
 				details: "Browsing YouTube Music",
 			});
 		}
@@ -153,7 +159,8 @@ presence.on("UpdateData", async () => {
 		}
 
 		presenceData = {
-			largeImageKey: "ytm_lg",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/Y/YouTube%20Music/assets/logo.png",
 			details: "Browsing",
 			startTimestamp,
 		};
@@ -253,18 +260,19 @@ presence.on("UpdateData", async () => {
 	if (!showBrowsing) return presence.clearActivity();
 
 	//* For some bizarre reason the timestamps are NaN eventho they are never actually set in testing, this spread is a workaround
+	presenceData.type = ActivityType.Listening;
 	presence.setActivity(presenceData);
 });
 
 function updateSongTimestamps() {
 	const element = document
 			.querySelector<HTMLSpanElement>("#left-controls > span")
-			.textContent.trim(),
-		currTimes = element.match(/(\d{1,2}):(\d{1,2})/),
-		totalTimes = element.match(/(\d{1,2}):(\d{1,2})$/);
+			.textContent.trim()
+			.split(" / "),
+		[currTimes, totalTimes] = element;
 
 	mediaTimestamps = presence.getTimestamps(
-		parseInt(currTimes[1]) * 60 + parseInt(currTimes[2]),
-		parseInt(totalTimes[1]) * 60 + parseInt(totalTimes[2])
+		presence.timestampFromFormat(currTimes),
+		presence.timestampFromFormat(totalTimes)
 	);
 }

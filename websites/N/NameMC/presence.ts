@@ -2,6 +2,7 @@ const presence = new Presence({
 		clientId: "809067572061405246",
 	}),
 	browsingTimestamp = Math.floor(Date.now() / 1000);
+
 async function getStrings() {
 	return presence.getStrings(
 		{
@@ -30,7 +31,7 @@ async function getStrings() {
 			buttonViewProfile: "general.buttonViewProfile",
 			viewSkin: "namemc.viewSkin",
 		},
-		await presence.getSetting<string>("lang")
+		await presence.getSetting<string>("lang").catch(() => "en")
 	);
 }
 
@@ -38,7 +39,7 @@ let strings: Awaited<ReturnType<typeof getStrings>>,
 	oldLang: string = null;
 
 presence.on("UpdateData", async () => {
-	const newLang = await presence.getSetting<string>("lang"),
+	const newLang = await presence.getSetting<string>("lang").catch(() => "en"),
 		buttons = await presence.getSetting<boolean>("buttons");
 
 	if (oldLang !== newLang || !strings) {
@@ -47,7 +48,8 @@ presence.on("UpdateData", async () => {
 	}
 
 	let presenceData: PresenceData = {
-		largeImageKey: "namemc",
+		largeImageKey:
+			"https://cdn.rcd.gg/PreMiD/websites/N/NameMC/assets/logo.png",
 		startTimestamp: browsingTimestamp,
 	};
 
@@ -163,7 +165,7 @@ presence.on("UpdateData", async () => {
 				.replace("?", "/")
 				.match(k)
 		) {
-			presenceData.smallImageKey = "reading";
+			presenceData.smallImageKey = Assets.Reading;
 			presenceData.smallImageText = strings.browse;
 			presenceData = { ...presenceData, ...v };
 		}

@@ -18,11 +18,10 @@ let strings: Awaited<ReturnType<typeof getStrings>>,
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-			largeImageKey: "https://i.imgur.com/wjqmEQY.png",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/U/UKTV/assets/logo.png",
 		},
-		video = document.querySelector<HTMLVideoElement>(
-			"video[id='video-content_html5_api']"
-		),
+		video = document.querySelector<HTMLVideoElement>("video"),
 		{ href, pathname } = document.location,
 		search = document.querySelector<HTMLInputElement>("#search-input"),
 		[newLang, privacy, covers, buttons] = await Promise.all([
@@ -39,14 +38,31 @@ presence.on("UpdateData", async () => {
 	else if (search) {
 		presenceData.details = "Searching for";
 		presenceData.state = search.value;
-		presenceData.smallImageKey = "search";
+		presenceData.smallImageKey = Assets.Search;
 	} else if (video?.duration) {
-		const titles = document.querySelector(
-			'[class="vod-episode__title margin-bottom--xxs invert-text semi-bold"]'
-		)?.textContent;
-		presenceData.details = titles;
+		const title = document.querySelector<HTMLMetaElement>(
+				'[property="og:title"]'
+			),
+			episodeSeason =
+				document
+					.querySelector('[class="vod-episode__ep-num"]')
+					?.lastChild?.textContent.replace(/,/gm, "") ??
+				title.content.replace(title.content.split(",")[0], "");
 
-		presenceData.smallImageKey = video.paused ? "pause" : "play";
+		presenceData.details =
+			document.querySelector(
+				'[class="vod-episode__title margin-bottom--xxs invert-text semi-bold"]'
+			)?.textContent ??
+			document.querySelector('[id="brand-page"]')?.textContent ??
+			title?.content.split(",")[0];
+		presenceData.state = episodeSeason
+			.split("-")[0]
+			.replace(/,/gm, "")
+			.replace("Series", "S")
+			.replace("Episode", ":E")
+			.replace(/ /gm, "")
+			.trim();
+		presenceData.smallImageKey = video.paused ? Assets.Pause : Assets.Play;
 		presenceData.smallImageText = video.paused ? strings.pause : strings.play;
 		[presenceData.startTimestamp, presenceData.endTimestamp] =
 			presence.getTimestampsfromMedia(video);
@@ -94,7 +110,7 @@ presence.on("UpdateData", async () => {
 			},
 		];
 		presenceData.details = strings.browse;
-		presenceData.smallImageKey = "search";
+		presenceData.smallImageKey = Assets.Search;
 		presenceData.smallImageText = strings.browse;
 		presenceData.buttons = [
 			{

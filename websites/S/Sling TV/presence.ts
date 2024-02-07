@@ -34,7 +34,8 @@ presence.on("UpdateData", async () => {
 		presenceData: PresenceData = {
 			details,
 			state,
-			largeImageKey: "slingtv",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/S/Sling%20TV/assets/logo.png",
 			smallImageKey,
 			smallImageText,
 			startTimestamp,

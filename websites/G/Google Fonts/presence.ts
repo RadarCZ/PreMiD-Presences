@@ -5,7 +5,8 @@ const presence = new Presence({
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-			largeImageKey: "favicon",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/G/Google%20Fonts/assets/logo.png",
 			smallImageKey: "google",
 			startTimestamp: tmb,
 		},

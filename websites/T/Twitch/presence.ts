@@ -149,6 +149,7 @@ presence.on("UpdateData", async () => {
 	}
 
 	let presenceData: PresenceData = {
+		type: ActivityType.Watching,
 		largeImageKey: logoArr[logo] || "twitch",
 		startTimestamp: elapsed,
 	};
@@ -278,7 +279,7 @@ presence.on("UpdateData", async () => {
 			if (showBrowsing) {
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -292,19 +293,18 @@ presence.on("UpdateData", async () => {
 				let user = getElement(".home-header-sticky .tw-title");
 				if (user) {
 					const tab = getElement('a[aria-selected="true"] > div > div > p'),
-						profilePic = document
-							.querySelector<HTMLImageElement>(
-								".tw-halo > .tw-aspect > .tw-avatar > .tw-image-avatar"
-							)
-							.src.replace(/-[0-9]{1,2}x[0-9]{1,2}/, "-600x600");
+						profilePic =
+							document
+								.querySelector<HTMLImageElement>(
+									".tw-halo > .tw-aspect > .tw-avatar > .tw-image-avatar"
+								)
+								?.src?.replace(/-[0-9]{1,2}x[0-9]{1,2}/, "-600x600") ??
+							(logoArr[logo] || "twitch");
 					user += tab ? ` (${tab})` : "";
 
 					presenceData.details = strings.viewProfile;
 					presenceData.state = user;
-					if (pfp) {
-						presenceData.largeImageKey =
-							profilePic ?? (logoArr[logo] || "twitch");
-					}
+					if (pfp) presenceData.largeImageKey = profilePic;
 				}
 
 				if (path.includes("/team/")) {
@@ -329,7 +329,7 @@ presence.on("UpdateData", async () => {
 					presenceData.details = strings.searchingFor;
 					presenceData.state =
 						document.querySelector<HTMLInputElement>("input").value;
-					presenceData.smallImageKey = "search";
+					presenceData.smallImageKey = Assets.Search;
 				}
 
 				if (path.includes("/drops/inventory/"))
@@ -439,33 +439,38 @@ presence.on("UpdateData", async () => {
 				if (showLive && live) {
 					//* Live
 					const title = getElement(".channel-info-content h2"),
-						streamer = getElement(".channel-info-content h1"),
+						streamer =
+							document.querySelector(".channel-info-content h1")?.textContent ??
+							document
+								.querySelector('[class*="metadata-layout__support"]')
+								?.querySelector("a")?.textContent,
 						game =
 							getElement("a[data-a-target='stream-game-link']") ||
 							"Just Chatting",
-						profilePic = document
-							.querySelector<HTMLImageElement>(
-								".tw-halo > .tw-aspect > .tw-avatar > .tw-image-avatar"
-							)
-							.src.replace(/-[0-9]{1,2}x[0-9]{1,2}/, "-600x600");
-					if (title && streamer) {
-						presenceData.details = streamDetail
-							.replace("%title%", title)
-							.replace("%streamer%", streamer)
-							.replace("%game%", game);
-					}
-					if (title && streamer) {
-						presenceData.state = streamState
-							.replace("%title%", title)
-							.replace("%streamer%", streamer)
-							.replace("%game%", game);
-					}
+						profilePic =
+							document
+								.querySelector<HTMLImageElement>(
+									".tw-halo > .tw-aspect > .tw-avatar > .tw-image-avatar"
+								)
+								?.src?.replace(/-[0-9]{1,2}x[0-9]{1,2}/, "-600x600") ??
+							(logoArr[logo] || "twitch");
+					presenceData.details = streamDetail
+						.replace("%title%", title ?? "")
+						.replace("%streamer%", streamer ?? "")
+						.replace("%game%", game);
+
+					presenceData.state = streamState
+						.replace("%title%", title ?? "")
+						.replace("%streamer%", streamer ?? "")
+						.replace("%game%", game);
+
+					if (!presenceData.details)
+						presenceData.details = strings.watchingLive;
+
 					presenceData.smallImageKey = "live";
 					presenceData.smallImageText = strings.live;
-					if (pfp) {
-						presenceData.largeImageKey =
-							profilePic ?? (logoArr[logo] || "twitch");
-					}
+					if (pfp) presenceData.largeImageKey = profilePic;
+
 					presenceData.buttons = [
 						{
 							label: strings.watchStream,
@@ -479,33 +484,33 @@ presence.on("UpdateData", async () => {
 					const title = getElement(".channel-info-content h2")
 							.split("•")
 							.shift(),
-						uploader = getElement(".channel-info-content h1"),
+						uploader =
+							document.querySelector(".channel-info-content h1")?.textContent ??
+							document
+								.querySelector('[class*="metadata-layout__support"]')
+								?.querySelector("a")?.textContent,
 						game =
 							getElement("a[data-a-target='stream-game-link']") ||
 							"Just Chatting",
-						profilePic = document
-							.querySelector<HTMLImageElement>(
-								".tw-halo > .tw-aspect > .tw-avatar > .tw-image-avatar"
-							)
-							.src.replace(/-[0-9]{1,2}x[0-9]{1,2}/, "-600x600");
-					if (title && uploader) {
-						presenceData.details = vidDetail
-							.replace("%title%", title)
-							.replace("%uploader%", uploader)
-							.replace("%game%", game);
-					}
-					if (title && uploader) {
-						presenceData.state = vidState
-							.replace("%title%", title)
-							.replace("%uploader%", uploader)
-							.replace("%game%", game);
-					}
-					presenceData.smallImageKey = "play";
+						profilePic =
+							document
+								.querySelector<HTMLImageElement>(
+									".tw-halo > .tw-aspect > .tw-avatar > .tw-image-avatar"
+								)
+								?.src?.replace(/-[0-9]{1,2}x[0-9]{1,2}/, "-600x600") ??
+							(logoArr[logo] || "twitch");
+					presenceData.details = vidDetail
+						.replace("%title%", title ?? "")
+						.replace("%uploader%", uploader ?? "")
+						.replace("%game%", game);
+					presenceData.state = vidState
+						.replace("%title%", title ?? "")
+						.replace("%uploader%", uploader ?? "")
+						.replace("%game%", game);
+					presenceData.smallImageKey = Assets.Play;
 					presenceData.smallImageText = strings.play;
-					if (pfp) {
-						presenceData.largeImageKey =
-							profilePic ?? (logoArr[logo] || "twitch");
-					}
+					if (pfp) presenceData.largeImageKey = profilePic;
+
 					const [startTimestamp, endTimestamp] =
 						presence.getTimestampsfromMedia(video);
 					presenceData.startTimestamp = startTimestamp;
@@ -522,7 +527,7 @@ presence.on("UpdateData", async () => {
 				if (((showLive && live) || (showVideo && !live)) && video.paused) {
 					delete presenceData.startTimestamp;
 					delete presenceData.endTimestamp;
-					presenceData.smallImageKey = "pause";
+					presenceData.smallImageKey = Assets.Pause;
 					presenceData.smallImageText = strings.pause;
 				}
 
@@ -613,7 +618,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -652,7 +657,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -663,7 +668,7 @@ presence.on("UpdateData", async () => {
 					document.querySelector(".plyr").className.includes("plyr--playing")
 				) {
 					presenceData.details = strings.brandWatch;
-					presenceData.smallImageKey = "play";
+					presenceData.smallImageKey = Assets.Play;
 					presenceData.smallImageText = strings.play;
 					[presenceData.startTimestamp, presenceData.endTimestamp] =
 						presence.getTimestamps(
@@ -705,7 +710,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -742,7 +747,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -762,7 +767,7 @@ presence.on("UpdateData", async () => {
 			if (showBrowsing) {
 				presenceData.details = strings.readingAbout;
 				presenceData.state = strings.affiliate;
-				presenceData.smallImageKey = "reading";
+				presenceData.smallImageKey = Assets.Reading;
 				presenceData.smallImageText = strings.browse;
 
 				if (privacy) {
@@ -806,7 +811,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -845,7 +850,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}
@@ -886,7 +891,7 @@ presence.on("UpdateData", async () => {
 
 				for (const [k, v] of Object.entries(statics)) {
 					if (path.match(k)) {
-						presenceData.smallImageKey = "reading";
+						presenceData.smallImageKey = Assets.Reading;
 						presenceData.smallImageText = strings.browse;
 						presenceData = { ...presenceData, ...v };
 					}

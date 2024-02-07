@@ -4,7 +4,8 @@ const presence = new Presence({
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-		largeImageKey: "mangatube",
+		largeImageKey:
+			"https://cdn.rcd.gg/PreMiD/websites/M/MangaTube/assets/logo.png",
 	};
 
 	//Startseite

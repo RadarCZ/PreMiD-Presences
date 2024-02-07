@@ -7,7 +7,8 @@ let item: HTMLElement, user: HTMLElement, title: HTMLElement | string | Element;
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-		largeImageKey: "labymod",
+		largeImageKey:
+			"https://cdn.rcd.gg/PreMiD/websites/L/LabyMod/assets/logo.png",
 		startTimestamp: browsingTimestamp,
 	};
 	switch (document.location.hostname) {

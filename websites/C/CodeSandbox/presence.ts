@@ -31,7 +31,8 @@ const presence = new Presence({
 	];
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-			largeImageKey: "load",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/C/CodeSandbox/assets/logo.png",
 			smallImageKey: "smallimagekey",
 			smallImageText: "CodeSandbox",
 			details: "Loading",

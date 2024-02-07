@@ -24,51 +24,11 @@ interface DiscoveryModel {
 	imageHighRes: string;
 }
 
-const presence = new Presence({
-		clientId: "926541425682829352",
-	}),
-	getStrings = async () => {
-		return presence.getStrings(
-			{
-				play: "general.playing",
-				pause: "general.paused",
-				browse: "general.browsing",
-				viewingMovie: "general.viewMovie",
-				viewingSeries: "general.viewSeries",
-				account: "general.viewAccount",
-				watchingMovie: "general.watchingMovie",
-				watchingSeries: "general.watchingSeries",
-				searchFor: "general.searchFor",
-				searchSomething: "general.searchSomething",
-				genre: "general.viewGenre",
-				viewSeries: "general.buttonViewSeries",
-				viewMovies: "general.buttonViewMovie",
-				watchEpisode: "general.buttonViewEpisode",
-				watchMovie: "general.buttonWatchMovie",
-				viewList: "netflix.viewList",
-				profile: "netflix.profile",
-				latest: "netflix.latest",
-				refer: "netflix.referral",
-			},
-			await presence.getSetting<string>("lang").catch(() => "en")
-		);
-	},
-	script = document.createElement("script"),
-	eventName = "PreMiD_Netflix";
+async function pushScript() {
+	script.id = eventName;
 
-let latestData: {
-		videoMetadata: Record<string, VideoMetadata>;
-		discoveryModels: Record<string, DiscoveryModel>;
-	} = null,
-	browsingTimestamp = Math.floor(Date.now() / 1000),
-	prevUrl = document.location.href,
-	strings: Awaited<ReturnType<typeof getStrings>> = null,
-	oldLang: string = null;
-
-//#region Variable Trickery
-script.id = eventName;
-script.appendChild(
-	document.createTextNode(`
+	script.appendChild(
+		document.createTextNode(`
     let isRunning = false;
 
     setInterval(() => {
@@ -122,14 +82,58 @@ script.appendChild(
       isRunning = false;
     }, 10);
   `)
-);
+	);
+	document.head.appendChild(script);
 
-document.head.appendChild(script);
+	window.addEventListener(eventName, (data: CustomEvent) => {
+		latestData = data.detail;
+	});
+}
 
-window.addEventListener(eventName, (data: CustomEvent) => {
-	latestData = data.detail;
-});
-//#endregion
+const presence = new Presence({
+		clientId: "926541425682829352",
+	}),
+	getStrings = async () => {
+		return presence.getStrings(
+			{
+				play: "general.playing",
+				pause: "general.paused",
+				browse: "general.browsing",
+				viewingMovie: "general.viewMovie",
+				viewingSeries: "general.viewSeries",
+				account: "general.viewAccount",
+				watchingMovie: "general.watchingMovie",
+				watchingSeries: "general.watchingSeries",
+				searchFor: "general.searchFor",
+				searchSomething: "general.searchSomething",
+				genre: "general.viewGenre",
+				viewSeries: "general.buttonViewSeries",
+				viewMovies: "general.buttonViewMovie",
+				watchEpisode: "general.buttonViewEpisode",
+				watchMovie: "general.buttonWatchMovie",
+				viewList: "netflix.viewList",
+				profile: "netflix.profile",
+				latest: "netflix.latest",
+				refer: "netflix.referral",
+			},
+			await presence.getSetting<string>("lang").catch(() => "en")
+		);
+	},
+	script = document.createElement("script"),
+	eventName = "PreMiD_Netflix",
+	readyOrNot =
+		document.readyState.includes("complete") ||
+		!document.querySelector('[class="loading-children-container"]'); // Checks if page is still loading. If loaded readyState = complete - So True; If loading screenelement doesnt exist - True; If still loading url or load screen element exist - False;
+
+let latestData: {
+		videoMetadata: Record<string, VideoMetadata>;
+		discoveryModels: Record<string, DiscoveryModel>;
+	} = null,
+	browsingTimestamp = Math.floor(Date.now() / 1000),
+	prevUrl = document.location.href,
+	strings: Awaited<ReturnType<typeof getStrings>> = null,
+	oldLang: string = null,
+	scriptPushed = false; //Check if the script has been loaded before. False = NOT loaded & True = loaded
 
 presence.on("UpdateData", async () => {
 	const [
@@ -162,11 +166,15 @@ presence.on("UpdateData", async () => {
 			presence.getSetting<boolean>("cover"),
 		]),
 		largeImage =
-			["https://i.imgur.com/Wf8G0mk.gif", "nflix_lg", "noback"][logo] ||
-			"nflix_lg";
+			[
+				"https://cdn.rcd.gg/PreMiD/websites/N/Netflix/assets/0.gif",
+				"nflix_lg",
+				"noback",
+			][logo] || "nflix_lg";
 
 	let presenceData: PresenceData = {
 			largeImageKey: largeImage,
+			type: ActivityType.Watching,
 		},
 		[videoMetadata] = Object.values(latestData?.videoMetadata || {});
 	//* Reset browsingTimestamp if href has changed.
@@ -174,6 +182,17 @@ presence.on("UpdateData", async () => {
 	if (document.location.href !== prevUrl) {
 		prevUrl = document.location.href;
 		browsingTimestamp = Math.floor(Date.now() / 1000);
+	}
+	if (
+		!scriptPushed &&
+		!readyOrNot &&
+		document.location.pathname.includes("/watch/")
+	)
+		// If it hasnt been pushed, is still loading & includes /watch/ return, otherwise continue showing other things in presence.ts
+		return;
+	else if (!scriptPushed && readyOrNot) {
+		scriptPushed = true;
+		pushScript(); // Load the script.
 	}
 
 	//* Language changed, reload strings
@@ -268,8 +287,8 @@ presence.on("UpdateData", async () => {
 			presence.getTimestampsfromMedia(videoElement);
 		if (paused) delete presenceData.endTimestamp;
 
-		presenceData.smallImageKey = paused ? "pause" : "play";
-		presenceData.smallImageText = strings[paused ? "pause" : "play"];
+		presenceData.smallImageKey = paused ? Assets.Pause : Assets.Play;
+		presenceData.smallImageText = paused ? strings.pause : strings.play;
 
 		switch (videoMetadata.type) {
 			case "movie": {
@@ -302,10 +321,10 @@ presence.on("UpdateData", async () => {
 					delete presenceData.endTimestamp;
 				}
 
-				if (presenceData.details.length < 3)
+				if ((presenceData.details as string).length < 3)
 					presenceData.details = ` ${presenceData.details}`;
 
-				if (presenceData.state?.length < 3)
+				if ((presenceData.state as string)?.length < 3)
 					presenceData.state = ` ${presenceData.state}`;
 
 				if (showMovie) return presence.setActivity(presenceData);
@@ -357,7 +376,7 @@ presence.on("UpdateData", async () => {
 				if (presenceData.details.length < 3)
 					presenceData.details = ` ${presenceData.details}`;
 
-				if (presenceData.state.length < 3)
+				if ((presenceData.state as string).length < 3)
 					presenceData.state = ` ${presenceData.state}`;
 
 				if (showSeries) return presence.setActivity(presenceData);
@@ -476,7 +495,7 @@ presence.on("UpdateData", async () => {
 					.replace("=", "/")
 					.match(k)
 			) {
-				presenceData.smallImageKey = "reading";
+				presenceData.smallImageKey = Assets.Reading;
 				presenceData.smallImageText = strings.browse;
 				presenceData = { ...presenceData, ...v };
 			}

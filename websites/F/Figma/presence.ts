@@ -5,7 +5,7 @@ const presence = new Presence({
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-		largeImageKey: "home", // Banner
+		largeImageKey: "https://cdn.rcd.gg/PreMiD/websites/F/Figma/assets/logo.png", // Banner
 	};
 	presenceData.startTimestamp = browsingTimestamp;
 

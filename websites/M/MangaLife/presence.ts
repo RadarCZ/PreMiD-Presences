@@ -57,7 +57,8 @@ presence.on("UpdateData", async () => {
 			},
 		};
 	let presenceData: PresenceData = {
-		largeImageKey: "logo",
+		largeImageKey:
+			"https://cdn.rcd.gg/PreMiD/websites/M/MangaLife/assets/logo.png",
 		smallImageKey: !privacy ? "home" : "",
 		details: "Browsing...",
 		state: "Home Page",
@@ -82,7 +83,9 @@ presence.on("UpdateData", async () => {
 			presenceData.buttons = [
 				{
 					label:
-						presenceData.state.length >= 30 ? "View Manga" : presenceData.state,
+						(presenceData.state as string).length >= 30
+							? "View Manga"
+							: presenceData.state,
 					url: `${document.location}`,
 				},
 			];

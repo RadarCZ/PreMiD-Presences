@@ -132,7 +132,8 @@ presence.on("UpdateData", async () => {
 		{
 			details,
 			state,
-			largeImageKey: "metastream",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/M/Metastream/assets/logo.png",
 			smallImageKey,
 			smallImageText,
 			startTimestamp,

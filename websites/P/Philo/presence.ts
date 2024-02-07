@@ -11,7 +11,8 @@ let elapsed: number, oldUrl: string;
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-			largeImageKey: "philo",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/P/Philo/assets/logo.png",
 		},
 		{ href, pathname: path } = window.location;
 

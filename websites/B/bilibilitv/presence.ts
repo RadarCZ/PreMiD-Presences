@@ -29,7 +29,8 @@ let strings: Awaited<ReturnType<typeof getStrings>>,
 presence.on("UpdateData", async () => {
 	const newLang = await presence.getSetting<string>("lang").catch(() => "en"),
 		presenceData: PresenceData = {
-			largeImageKey: "main",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/B/bilibilitv/assets/logo.png",
 			startTimestamp: browsingTimestamp,
 		},
 		{ hostname, href, pathname } = document.location,
@@ -40,12 +41,9 @@ presence.on("UpdateData", async () => {
 		),
 		thumbnail =
 			document
-				.querySelector(".player-mobile-video-wrap > video")
-				?.getAttribute("poster")
-				?.split("@")[0] ||
-			document
-				.querySelector<HTMLMetaElement>('meta[name="og:image"]')
-				?.content?.split("@")[0];
+				.querySelector<HTMLMetaElement>('meta[property="og:image"]')
+				?.content?.split("?")?.[0] ??
+			"https://cdn.rcd.gg/PreMiD/websites/B/bilibilitv/assets/logo.png";
 	if (oldLang !== newLang || !strings) {
 		oldLang = newLang;
 		strings = await getStrings();
@@ -67,7 +65,7 @@ presence.on("UpdateData", async () => {
 			case "play": {
 				presenceData.details = title;
 				presenceData.state = `${strings.episode} ${document
-					.querySelector(".ep-item__reference--active")
+					.querySelector("a.ep-item.ep-item--active")
 					.textContent?.replace(/\D/g, "")}`;
 				presenceData.buttons = [
 					{
@@ -82,14 +80,14 @@ presence.on("UpdateData", async () => {
 				presenceData.state = document.querySelector(
 					".media-detail__title"
 				).textContent;
-				presenceData.smallImageKey = "reading";
+				presenceData.smallImageKey = Assets.Reading;
 				presenceData.smallImageText = strings.browsing;
 				break;
 			}
 			case "popular": {
 				presenceData.details = strings.viewCategory.replace(":", "");
 				presenceData.state = "Popular";
-				presenceData.smallImageKey = "reading";
+				presenceData.smallImageKey = Assets.Reading;
 				presenceData.smallImageText = strings.browsing;
 				break;
 			}
@@ -106,20 +104,20 @@ presence.on("UpdateData", async () => {
 					document.querySelector(
 						"a.router-link-exact-active.router-link-active.anime-radio__tag.anime-radio__tag--active"
 					)?.textContent ?? strings.searchSomething;
-				presenceData.smallImageKey = "search";
+				presenceData.smallImageKey = Assets.Search;
 				presenceData.smallImageText = strings.browsing;
 				break;
 			}
 			default: {
 				presenceData.details = strings.viewHome;
-				presenceData.smallImageKey = "reading";
+				presenceData.smallImageKey = Assets.Reading;
 				presenceData.smallImageText = strings.browsing;
 				break;
 			}
 		}
 		if (pathArray[2] === "video" || pathArray[2] === "play") {
 			presenceData.largeImageKey = thumbnail;
-			presenceData.smallImageKey = playing ? "play" : "pause";
+			presenceData.smallImageKey = playing ? Assets.Play : Assets.Pause;
 			if (playing) {
 				[, presenceData.endTimestamp] = presence.getTimestamps(
 					presence.timestampFromFormat(

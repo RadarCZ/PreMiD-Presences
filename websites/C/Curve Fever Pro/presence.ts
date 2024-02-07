@@ -29,7 +29,8 @@ let lastlobbyName = "",
 	lastName = "Unnamed";
 
 const presenceData: PresenceData = {
-	largeImageKey: "index",
+	largeImageKey:
+		"https://cdn.rcd.gg/PreMiD/websites/C/Curve%20Fever%20Pro/assets/logo.png",
 	startTimestamp: Date.now(),
 	details: "Main Menu",
 	state: "Just Started Playing",

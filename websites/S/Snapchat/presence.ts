@@ -10,7 +10,8 @@ presence.on("UpdateData", async () => {
 		]),
 		presenceData: PresenceData = {
 			details: "Other",
-			largeImageKey: "logo",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/S/Snapchat/assets/logo.png",
 			startTimestamp: browsingTimestamp,
 		},
 		activeChat = document.querySelector<HTMLDivElement>(
@@ -27,9 +28,9 @@ presence.on("UpdateData", async () => {
 				activeChat?.querySelectorAll("div.ovUsZ > span")[4]?.textContent;
 
 		presenceData.details = "Chatting with";
-		presenceData.state = privacyMode ? activeChatUsername : "somebody";
+		presenceData.state = !privacyMode ? activeChatUsername : "somebody";
 
-		if (privacyMode && snapStreak) presenceData.state += ` | ${snapStreak}`;
+		if (!privacyMode && snapStreak) presenceData.state += ` | ${snapStreak}`;
 
 		if (showActiveChatAvatar && avatar) {
 			presenceData.largeImageKey = avatar;

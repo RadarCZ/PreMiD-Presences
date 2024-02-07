@@ -339,7 +339,7 @@ presence.on("UpdateData", () => {
 
 	presence.setActivity({
 		details: details ?? translate(isMale).default,
-		largeImageKey: "stips",
+		largeImageKey: "https://cdn.rcd.gg/PreMiD/websites/S/Stips/assets/logo.png",
 		smallImageKey: hasDark ? "stipspin_dark" : "stipspin_light",
 		startTimestamp: elapsed,
 		smallImageText,

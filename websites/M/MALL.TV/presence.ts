@@ -4,7 +4,8 @@ const presence = new Presence({
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-			largeImageKey: "malltvlogo",
+			largeImageKey:
+				"https://cdn.rcd.gg/PreMiD/websites/M/MALL.TV/assets/logo.png",
 		},
 		strings = await presence.getStrings({
 			browsing: "general.browsing",

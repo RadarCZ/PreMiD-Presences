@@ -4,7 +4,7 @@ const presence = new Presence({
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-		largeImageKey: "giphy_big",
+		largeImageKey: "https://cdn.rcd.gg/PreMiD/websites/G/Giphy/assets/logo.png",
 	};
 
 	if (document.location.pathname === "/") {

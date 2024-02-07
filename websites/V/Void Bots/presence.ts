@@ -1,5 +1,6 @@
 const presence = new Presence({ clientId: "765261270814949417" }),
 	browsingTimestamp = Math.floor(Date.now() / 1000);
+
 let oldLang: string = null,
 	strings: LangStrings;
 
@@ -26,7 +27,7 @@ presence.on("UpdateData", async () => {
 	const incognito = await presence.getSetting<boolean>("incognito"),
 		showTimestamp = await presence.getSetting<boolean>("showTimestamp"),
 		showButtons = await presence.getSetting<boolean>("buttons"),
-		newLang = await presence.getSetting<string>("lang");
+		newLang = await presence.getSetting<string>("lang").catch(() => "en");
 	if (!oldLang || oldLang !== newLang) {
 		oldLang = newLang;
 		strings = await presence.getStrings(
@@ -45,7 +46,8 @@ presence.on("UpdateData", async () => {
 	}
 
 	const presenceData: PresenceData = {
-		largeImageKey: "img_logo",
+		largeImageKey:
+			"https://cdn.rcd.gg/PreMiD/websites/V/Void%20Bots/assets/logo.png",
 	};
 
 	if (showTimestamp === true) presenceData.startTimestamp = browsingTimestamp;

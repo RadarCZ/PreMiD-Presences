@@ -5,7 +5,7 @@ const presence = new Presence({
 
 presence.on("UpdateData", async () => {
 	const presenceData: PresenceData = {
-		largeImageKey: "app",
+		largeImageKey: "https://cdn.rcd.gg/PreMiD/websites/X/Xbox/assets/logo.png",
 		startTimestamp: timestamp,
 	};
 
